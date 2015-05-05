@@ -1,10 +1,32 @@
 <!doctype html>
 <html>
     <head>
+        <link rel='stylesheet' href='//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css'>
         <link rel='stylesheet' href='style.css'>
     </head>
-    <body>
-        <div id='log'></div>
+    <body class='container'>
+        <h1>Hey, your DNS is showing.</h1>
+
+        <p>
+            Your ISP runs a domain name resolution server.
+            When you type a URL or click a link in your web browser,
+            this DNS server looks up the domain name in the URL,
+            and sends you back the corresponding IP address so that your computer
+            can connect to the website.
+        </p>
+        <p>
+            <b>Your ISP sees every domain that you ask for. And they keep logs.</b>
+        </p>
+        <p>
+            The computer hosting this page is also running a DNS server.
+            If you are connected to this network, your DNS requests are going through this
+            computer the same way they go through your ISP.
+            Check the box below to see what your ISP sees:
+        </p>
+
+        <div id='log' class='highlight'></div>
+
+        <p>From your friends at <a href='https://torontocrypto.org'>torontocrypto.org</a>.</p>
 
         <script src='https://code.jquery.com/jquery.min.js'></script>
         <script src='/socket.io/socket.io.js'></script>

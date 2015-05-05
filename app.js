@@ -25,8 +25,8 @@ io.on('connection', function (socket) {
 var logfile = path.join(__dirname, 'logfile');
 
 fs.realpath(logfile, function (err, logpath) {
-    if (err) throw err;
-    console.log('Watching log file:', logpath);
+    if (err) console.log('Error:', err.message);
+    else console.log('Watching log file:', logpath);
 });
 
 fs.watchFile(logfile, function (curr, prev) {
@@ -49,7 +49,6 @@ fs.watchFile(logfile, function (curr, prev) {
         });
     });
 });
-
 
 
 app.use('/', express.static(path.join(__dirname, 'static')));
