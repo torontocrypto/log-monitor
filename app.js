@@ -5,32 +5,36 @@ var path = require('path');
 var request = require('request');
 var socketio = require('socket.io');
 
+
 var app = express();
-var server = http.Server(app);
-var io = socketio(server);
+app.use('/', express.static(path.join(__dirname, 'static')));
 
 
 var port = 9000;
-
+var server = http.Server(app);
 server.listen(port);
-console.log('Server listening on port', port);
+console.log('Web server listening on port', port);
 
 
+// websockets server for push notifications
+var io = socketio(server);
 io.on('connection', function (socket) {
     console.log('A user connected from', socket.handshake.address);
 });
 
 
-// for now let's just symlink this to the real file
-var logfile = path.join(__dirname, 'logfile');
+// log file paths - for now let's just symlink these to the live log files
+var bind_log = path.join(__dirname, 'bind_log');
+var tshark_log = path.join(__dirname, 'tshark_log');
 
-fs.realpath(logfile, function (err, logpath) {
+
+// watch bind log for dns queries
+fs.realpath(bind_log, function (err, logpath) {
     if (err) console.log('Error:', err.message);
-    else console.log('Watching log file:', logpath);
+    else console.log('Watching bind log file:', logpath);
 });
-
-fs.watchFile(logfile, function (curr, prev) {
-    fs.readFile(logfile, {
+fs.watchFile(bind_log, function (curr, prev) {
+    fs.readFile(bind_log, {
         encoding: 'utf-8',
     }, function (err, data) {
         if (err) return;
@@ -39,8 +43,8 @@ fs.watchFile(logfile, function (curr, prev) {
         data.trim().slice(prev.size).split('\n').forEach(function (line) {
             var m = line.match(/client (.+)#.*query: ([\w\-\.]+) .* \((.+)\)/);
             if (m) {
-                console.log('New log line in logfile:', line);
-                io.emit('query', {
+                console.log('New line in bind log:', line);
+                io.emit('bind', {
                     client: m[1],
                     host: m[2],
                     ip: m[3],
@@ -51,20 +55,33 @@ fs.watchFile(logfile, function (curr, prev) {
 });
 
 
-app.use('/', express.static(path.join(__dirname, 'static')));
-
-app.get('/', function (req, res, next) {
-    res.sendFile(path.join(__dirname, 'views/index.html'));
+// watch tshark log for http post data
+fs.realpath(tshark_log, function (err, logpath) {
+    if (err) console.log('Error:', err.message);
+    else console.log('Watching tshark log file:', logpath);
 });
+fs.watchFile(tshark_log, function (curr, prev) {
+    fs.readFile(tshark_log, {
+        encoding: 'utf-8',
+    }, function (err, data) {
+        if (err) return;
 
-app.enable('trust proxy');  // this allows us to access req.ip
-app.get('/geo', function (req, res, next) {
-    request({
-        url: 'https://freegeoip.net/json/' + req.ip,
-        json: true,
-        timeout: 5000,
-    }, function (err, resp, body) {
-        if (err) return next(err);
-        res.jsonp(body);
+        // parse lines from tshark log file and send to client
+        data.trim().slice(prev.size).split('\n').forEach(function (line) {
+            var m = line.match(/^(.*)\t(.*)\t(.*)\t(.*)\t(.*)$/);
+            if (m) {
+                console.log('New line in tshark bind log:', line);
+                io.emit('tshark', {
+                    src: m[1],
+                    dst: m[2],
+                    host: m[3],
+                    keys: m[4].split('|'),
+                    values: m[5].split('|'),
+                });
+            }
+        });
     });
 });
+
+
+// web pages

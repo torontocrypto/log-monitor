@@ -1,0 +1,32 @@
+<!doctype html>
+<html>
+    <head>
+        <title>POST Data Monitor - Toronto Crypto</title>
+        <link rel='stylesheet' href='//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css'>
+        <link rel='stylesheet' href='style.css'>
+    </head>
+    <body class='container'>
+        <h1>Sure you want to submit that form?</h1>
+
+        <p>
+            By default, web forms send data in plain text. Yes, even that password field
+            that looks like ••••••••. On an unencrypted connection (that is, without HTTPS),
+            that data can be read by any computer along the route from you to the website,
+            including your ISP. In some cases, it can even be read by other computers who are just
+            connected to the same network as you.
+        </p>
+        <p>
+            Submitting a form on a website with an <i>http://</i> connection and not <i>https://</i>
+            is a little like sending a letter in the mail without an envelope.
+            See for yourself:
+        </p>
+
+        <div id='tshark-log' class='log'></div>
+
+        <p>From your friends at <a href='https://torontocrypto.org'>torontocrypto.org</a>.</p>
+
+        <script src='https://code.jquery.com/jquery.min.js'></script>
+        <script src='/socket.io/socket.io.js'></script>
+        <script src='script.js'></script>
+    </body>
+</html>
